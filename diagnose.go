@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -24,33 +23,27 @@ const (
 	langCN      = "Chinese"
 )
 
-func preCheck(cmd *cobra.Command, args []string) error {
-	token := os.Getenv(envKopilotToken)
-	typ := os.Getenv(envKopilotType)
-	if typ == "" {
-		typ = typeChatGPT
-	}
-	lang := os.Getenv(envKopilotLang)
-	if lang == "" {
-		lang = langEN
-	}
-	cmd.Printf("You're using %s client with %s, customize them with %s and %s.\n", typ, lang, envKopilotType, envKopilotLang)
-	if token == "" {
-		return fmt.Errorf("please specify the token for %s, please specify the token with ENV %s", typ, envKopilotToken)
-	}
-	return nil
+type option struct {
+	token string
+	lang  string
+	typ   string
 }
 
 type templateData struct {
 	Data string
 }
 
-func newDiagnoseCommand() *cobra.Command {
+func newDiagnoseCommand(opt option) *cobra.Command {
 	cf := genericclioptions.NewConfigFlags(true)
 	cmd := &cobra.Command{
-		Use:          "diagnose TYPE NAME",
-		Short:        "Diagnose a resource",
-		PreRunE:      preCheck,
+		Use:   "diagnose TYPE NAME",
+		Short: "Diagnose a resource",
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			if opt.token == "" {
+				return fmt.Errorf("please specify the token for %s with ENV %s", opt.typ, envKopilotToken)
+			}
+			return nil
+		},
 		SilenceUsage: true,
 		Args:         cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {

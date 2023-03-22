@@ -17,7 +17,7 @@ type chatGPTClient struct {
 	lang   string
 }
 
-func NewGPT3Client(token string, options ChatGPTOption) Client {
+func NewChatGPTClient(token string, options ChatGPTOption) Client {
 	c := openai.NewClient(token)
 	return &chatGPTClient{
 		client: c,

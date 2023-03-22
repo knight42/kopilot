@@ -71,15 +71,16 @@ func newDiagnoseCommand(opt option) *cobra.Command {
 			}
 
 			var buf bytes.Buffer
-			_ = promptDiagnose.Execute(&buf, templateData{Data: string(data), Lang: opt.lang})
+			_ = promptDiagnose.Execute(&buf, templateData{
+				Data: string(data),
+				Lang: opt.lang,
+			})
 
 			cmd.Println("Diagnosing...")
 			var cli client.Client
 			switch opt.typ {
 			case typeChatGPT:
-				cli = client.NewChatGPTClient(opt.token, client.ChatGPTOption{
-					Lang: opt.lang,
-				})
+				cli = client.NewChatGPTClient(opt.token, client.ChatGPTOption{})
 			default:
 				return fmt.Errorf("invalid type %s", opt.typ)
 			}

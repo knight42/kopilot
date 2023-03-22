@@ -6,23 +6,16 @@ import (
 	openai "github.com/sashabaranov/go-openai"
 )
 
-type ChatGPTOption struct {
-	MaxToken int
-	Lang     string
-}
-
 type chatGPTClient struct {
 	client *openai.Client
 	model  string
-	lang   string
 }
 
-func NewChatGPTClient(token string, options ChatGPTOption) Client {
+func NewChatGPTClient(token string) Client {
 	c := openai.NewClient(token)
 	return &chatGPTClient{
 		client: c,
 		model:  openai.GPT3Dot5Turbo,
-		lang:   options.Lang,
 	}
 }
 

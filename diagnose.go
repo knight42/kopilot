@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -49,23 +50,7 @@ func newDiagnoseCommand(opt option) *cobra.Command {
 		Args:         cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ns, _, _ := cf.ToRawKubeConfigLoader().Namespace()
-			obj, err := resource.NewBuilder(cf).
-				NamespaceParam(ns).
-				DefaultNamespace().
-				Unstructured().
-				SingleResourceType().
-				ResourceNames(args[0], args[1]).
-				Do().
-				Object()
-			if err != nil {
-				return fmt.Errorf("get object: %w", err)
-			}
-			metaObj, err := meta.Accessor(obj)
-			if err == nil {
-				metaObj.SetManagedFields(nil)
-			}
-
-			data, err := yaml.Marshal(obj)
+			data, err := getResourceInYAML(cf, ns, args[0], args[1])
 			if err != nil {
 				return fmt.Errorf("marshal object: %w", err)
 			}
@@ -77,16 +62,9 @@ func newDiagnoseCommand(opt option) *cobra.Command {
 			})
 
 			cmd.Println("Diagnosing...")
-			var cli client.Client
-			switch opt.typ {
-			case typeChatGPT:
-				cli = client.NewChatGPTClient(opt.token, client.ChatGPTOption{})
-			default:
-				return fmt.Errorf("invalid type %s", opt.typ)
-			}
-			resp, err := cli.CreateCompletion(cmd.Context(), buf.String())
+			resp, err := createCompletion(cmd.Context(), opt, buf.String())
 			if err != nil {
-				return fmt.Errorf("create completion: %w", err)
+				return err
 			}
 			cmd.Println(resp)
 			return nil
@@ -97,4 +75,43 @@ func newDiagnoseCommand(opt option) *cobra.Command {
 	flags.StringVarP(cf.Namespace, "namespace", "n", *cf.Namespace, "If present, the namespace scope for this CLI request")
 
 	return cmd
+}
+
+func createCompletion(ctx context.Context, opt option, prompt string) (string, error) {
+	var cli client.Client
+	switch opt.typ {
+	case typeChatGPT:
+		cli = client.NewChatGPTClient(opt.token)
+	default:
+		return "", fmt.Errorf("invalid type %s", opt.typ)
+	}
+	resp, err := cli.CreateCompletion(ctx, prompt)
+	if err != nil {
+		return "", fmt.Errorf("create completion: %w", err)
+	}
+	return resp, nil
+}
+
+func getResourceInYAML(cf *genericclioptions.ConfigFlags, ns, res, name string) (string, error) {
+	obj, err := resource.NewBuilder(cf).
+		NamespaceParam(ns).
+		DefaultNamespace().
+		Unstructured().
+		SingleResourceType().
+		ResourceNames(res, name).
+		Do().
+		Object()
+	if err != nil {
+		return "", fmt.Errorf("get object: %w", err)
+	}
+	metaObj, err := meta.Accessor(obj)
+	if err == nil {
+		metaObj.SetManagedFields(nil)
+	}
+
+	data, err := yaml.Marshal(obj)
+	if err != nil {
+		return "", fmt.Errorf("marshal object: %w", err)
+	}
+	return string(data), nil
 }

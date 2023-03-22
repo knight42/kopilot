@@ -28,9 +28,10 @@ func main() {
 You need three ENVs to run Kopilot.
 Set %s to specify your token.
 Set %s to specify your token type, current type is: %s.
-Set %s to specify the language, current language is: %s.
+Set %s to specify the language, current language is: %s. Valid options like Chinese, French, Spain, etc.
 `, envKopilotToken, envKopilotType, typ, envKopilotLang, lang),
 	}
 	cmd.AddCommand(newDiagnoseCommand(opt))
+	cmd.AddCommand(newAuditCommand(opt))
 	_ = cmd.Execute()
 }

@@ -17,24 +17,24 @@ const (
 	envKopilotType  = "KOPILOT_TOKEN_TYPE"
 	envKopilotLang  = "KOPILOT_LANG"
 
-	typeGPT3 = "GPT3"
-	langEN   = "English"
-	langCN   = "Chinese"
+	typeChatGPT = "ChatGPT"
+	langEN      = "English"
+	langCN      = "Chinese"
 )
 
 func preCheck(cmd *cobra.Command, args []string) error {
 	token := os.Getenv(envKopilotToken)
 	typ := os.Getenv(envKopilotType)
 	if typ == "" {
-		typ = typeGPT3
+		typ = typeChatGPT
 	}
 	lang := os.Getenv(envKopilotLang)
 	if lang == "" {
 		lang = langEN
 	}
-	cmd.Printf("You're using %s client with %s, customize them with %s and %s.", typ, lang, envKopilotType, envKopilotLang)
+	cmd.Printf("You're using %s client with %s, customize them with %s and %s.\n", typ, lang, envKopilotType, envKopilotLang)
 	if token == "" {
-		return fmt.Errorf("please specify the token for %s", typ)
+		return fmt.Errorf("please specify the token for %s, please specify the token with ENV %s", typ, envKopilotToken)
 	}
 	return nil
 }

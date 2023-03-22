@@ -3,7 +3,7 @@ package client
 import (
 	"context"
 
-	openai "github.com/sashabaranov/go-openai"
+	"github.com/sashabaranov/go-openai"
 )
 
 type chatGPTClient struct {

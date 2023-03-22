@@ -79,6 +79,7 @@ func newDiagnoseCommand() *cobra.Command {
 			var buf bytes.Buffer
 			_ = promptDiagnose.Execute(&buf, templateData{Data: string(data)})
 
+			cmd.Println("Diagnosing...")
 			cli := client.NewGPT3Client(os.Getenv(envKopilotToken), client.ChatGPTOption{})
 			resp, err := cli.CreateCompletion(cmd.Context(), buf.String())
 			if err != nil {

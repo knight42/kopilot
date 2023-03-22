@@ -73,7 +73,15 @@ func newDiagnoseCommand(opt option) *cobra.Command {
 			_ = promptDiagnose.Execute(&buf, templateData{Data: string(data)})
 
 			cmd.Println("Diagnosing...")
-			cli := client.NewGPT3Client(os.Getenv(envKopilotToken), client.ChatGPTOption{})
+			var cli client.Client
+			switch opt.typ {
+			case typeChatGPT:
+				cli = client.NewChatGPTClient(opt.token, client.ChatGPTOption{
+					Lang: opt.lang,
+				})
+			default:
+				return fmt.Errorf("invalid type %s", opt.typ)
+			}
 			resp, err := cli.CreateCompletion(cmd.Context(), buf.String())
 			if err != nil {
 				return fmt.Errorf("create completion: %w", err)

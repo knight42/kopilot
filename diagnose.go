@@ -1,7 +1,7 @@
 package main
 
 import (
-	"errors"
+	"bytes"
 	"fmt"
 	"os"
 
@@ -10,6 +10,8 @@ import (
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/cli-runtime/pkg/resource"
 	"sigs.k8s.io/yaml"
+
+	"github.com/knight42/kopilot/client"
 )
 
 const (
@@ -50,10 +52,8 @@ func newDiagnoseCommand() *cobra.Command {
 		Short:        "Diagnose a resource",
 		PreRunE:      preCheck,
 		SilenceUsage: true,
+		Args:         cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) != 2 {
-				return errors.New("must specify type and name")
-			}
 			ns, _, _ := cf.ToRawKubeConfigLoader().Namespace()
 			obj, err := resource.NewBuilder(cf).
 				NamespaceParam(ns).
@@ -76,9 +76,16 @@ func newDiagnoseCommand() *cobra.Command {
 				return fmt.Errorf("marshal object: %w", err)
 			}
 
-			return promptDiagnose.Execute(cmd.OutOrStdout(), templateData{
-				Data: string(data),
-			})
+			var buf bytes.Buffer
+			_ = promptDiagnose.Execute(&buf, templateData{Data: string(data)})
+
+			cli := client.NewGPT3Client(os.Getenv(envKopilotToken), client.ChatGPTOption{})
+			resp, err := cli.CreateCompletion(cmd.Context(), buf.String())
+			if err != nil {
+				return fmt.Errorf("create completion: %w", err)
+			}
+			cmd.Println(resp)
+			return nil
 		},
 	}
 	flags := cmd.Flags()

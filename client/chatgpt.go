@@ -21,7 +21,7 @@ func NewChatGPTClient(token string) Client {
 	}
 }
 
-func (c *chatGPTClient) CreateCompletion(ctx context.Context, prompt string, writer io.Writer) error {
+func (c *chatGPTClient) CreateCompletion(ctx context.Context, prompt string, writer io.Writer, spinner Spinner) error {
 	req := openai.ChatCompletionRequest{
 		Model: c.model,
 		Messages: []openai.ChatCompletionMessage{
@@ -38,6 +38,15 @@ func (c *chatGPTClient) CreateCompletion(ctx context.Context, prompt string, wri
 	}
 	defer stream.Close()
 
+	isSpinnerStopped := false
+	isFirstMsg := true
+
+	defer func() {
+		if !isSpinnerStopped {
+			spinner.Stop()
+		}
+	}()
+
 	for {
 		response, err := stream.Recv()
 		if errors.Is(err, io.EOF) {
@@ -46,6 +55,12 @@ func (c *chatGPTClient) CreateCompletion(ctx context.Context, prompt string, wri
 
 		if err != nil {
 			return err
+		}
+
+		if isFirstMsg {
+			spinner.Stop()
+			isFirstMsg = false
+			isSpinnerStopped = true
 		}
 
 		_, err = io.WriteString(writer, response.Choices[0].Delta.Content)

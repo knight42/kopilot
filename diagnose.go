@@ -6,10 +6,9 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/cli-runtime/pkg/resource"
-	_ "k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/kubernetes/scheme"
 )
 
 func newDiagnoseCommand() *cobra.Command {
@@ -25,11 +24,18 @@ func newDiagnoseCommand() *cobra.Command {
 			obj, err := resource.NewBuilder(cf).
 				NamespaceParam(ns).
 				DefaultNamespace().
-				WithScheme(scheme.Scheme, scheme.Scheme.PrioritizedVersionsAllGroups()...).
+				Unstructured().
 				SingleResourceType().
-				ResourceNames(args[0], args[1]).Latest().Do().Object()
+				ResourceNames(args[0], args[1]).
+				Latest().
+				Do().
+				Object()
 			if err != nil {
 				return fmt.Errorf("get object: %w", err)
+			}
+			metaObj, err := meta.Accessor(obj)
+			if err == nil {
+				metaObj.SetManagedFields(nil)
 			}
 			return json.NewEncoder(cmd.OutOrStdout()).Encode(obj)
 		},

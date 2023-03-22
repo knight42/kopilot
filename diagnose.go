@@ -57,7 +57,7 @@ func newDiagnoseCommand(opt option) *cobra.Command {
 
 			var buf bytes.Buffer
 			_ = promptDiagnose.Execute(&buf, templateData{
-				Data: string(data),
+				Data: data,
 				Lang: opt.lang,
 			})
 

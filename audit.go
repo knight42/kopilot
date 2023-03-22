@@ -11,8 +11,8 @@ import (
 func newAuditCommand(opt option) *cobra.Command {
 	cf := genericclioptions.NewConfigFlags(true)
 	cmd := &cobra.Command{
-		Use:   "diagnose TYPE NAME",
-		Short: "Diagnose a resource",
+		Use:   "audit TYPE NAME",
+		Short: "Audit a resource",
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			if opt.token == "" {
 				return fmt.Errorf("please specify the token for %s with ENV %s", opt.typ, envKopilotToken)
@@ -30,7 +30,7 @@ func newAuditCommand(opt option) *cobra.Command {
 
 			var buf bytes.Buffer
 			_ = promptAudit.Execute(&buf, templateData{
-				Data: string(data),
+				Data: data,
 				Lang: opt.lang,
 			})
 

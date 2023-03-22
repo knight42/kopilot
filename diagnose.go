@@ -31,6 +31,7 @@ type option struct {
 
 type templateData struct {
 	Data string
+	Lang string
 }
 
 func newDiagnoseCommand(opt option) *cobra.Command {
@@ -70,7 +71,7 @@ func newDiagnoseCommand(opt option) *cobra.Command {
 			}
 
 			var buf bytes.Buffer
-			_ = promptDiagnose.Execute(&buf, templateData{Data: string(data)})
+			_ = promptDiagnose.Execute(&buf, templateData{Data: string(data), Lang: opt.lang})
 
 			cmd.Println("Diagnosing...")
 			var cli client.Client

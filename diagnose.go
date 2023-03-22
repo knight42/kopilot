@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -10,6 +11,33 @@ import (
 	"k8s.io/cli-runtime/pkg/resource"
 	"sigs.k8s.io/yaml"
 )
+
+const (
+	envKopilotToken = "KOPILOT_TOKEN"
+	envKopilotType  = "KOPILOT_TOKEN_TYPE"
+	envKopilotLang  = "KOPILOT_LANG"
+
+	typeGPT3 = "GPT3"
+	langEN   = "English"
+	langCN   = "Chinese"
+)
+
+func preCheck(cmd *cobra.Command, args []string) error {
+	token := os.Getenv(envKopilotToken)
+	typ := os.Getenv(envKopilotType)
+	if typ == "" {
+		typ = typeGPT3
+	}
+	lang := os.Getenv(envKopilotLang)
+	if lang == "" {
+		lang = langEN
+	}
+	cmd.Printf("You're using %s client with %s, customize them with %s and %s.", typ, lang, envKopilotType, envKopilotLang)
+	if token == "" {
+		return fmt.Errorf("please specify the token for %s", typ)
+	}
+	return nil
+}
 
 type templateData struct {
 	Data string
@@ -20,6 +48,7 @@ func newDiagnoseCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "diagnose TYPE NAME",
 		Short:        "Diagnose a resource",
+		PreRunE:      preCheck,
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) != 2 {

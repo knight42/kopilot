@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -62,11 +63,10 @@ func newDiagnoseCommand(opt option) *cobra.Command {
 			})
 
 			cmd.Println("Diagnosing...")
-			resp, err := createCompletion(cmd.Context(), opt, buf.String())
+			err = createCompletion(cmd.Context(), opt, buf.String(), cmd.OutOrStderr())
 			if err != nil {
 				return err
 			}
-			cmd.Println(resp)
 			return nil
 		},
 	}
@@ -77,19 +77,19 @@ func newDiagnoseCommand(opt option) *cobra.Command {
 	return cmd
 }
 
-func createCompletion(ctx context.Context, opt option, prompt string) (string, error) {
+func createCompletion(ctx context.Context, opt option, prompt string, writer io.Writer) error {
 	var cli client.Client
 	switch opt.typ {
 	case typeChatGPT:
 		cli = client.NewChatGPTClient(opt.token)
 	default:
-		return "", fmt.Errorf("invalid type %s", opt.typ)
+		return fmt.Errorf("invalid type %s", opt.typ)
 	}
-	resp, err := cli.CreateCompletion(ctx, prompt)
+	err := cli.CreateCompletion(ctx, prompt, writer)
 	if err != nil {
-		return "", fmt.Errorf("create completion: %w", err)
+		return fmt.Errorf("create completion: %w", err)
 	}
-	return resp, nil
+	return nil
 }
 
 func getResourceInYAML(cf *genericclioptions.ConfigFlags, ns, res, name string) (string, error) {

@@ -2,6 +2,8 @@ package client
 
 import (
 	"context"
+	"errors"
+	"io"
 
 	"github.com/sashabaranov/go-openai"
 )
@@ -19,7 +21,7 @@ func NewChatGPTClient(token string) Client {
 	}
 }
 
-func (c *chatGPTClient) CreateCompletion(ctx context.Context, prompt string) (string, error) {
+func (c *chatGPTClient) CreateCompletion(ctx context.Context, prompt string, writer io.Writer) error {
 	req := openai.ChatCompletionRequest{
 		Model: c.model,
 		Messages: []openai.ChatCompletionMessage{
@@ -28,10 +30,27 @@ func (c *chatGPTClient) CreateCompletion(ctx context.Context, prompt string) (st
 				Content: prompt,
 			},
 		},
+		Stream: true,
 	}
-	resp, err := c.client.CreateChatCompletion(ctx, req)
+	stream, err := c.client.CreateChatCompletionStream(ctx, req)
 	if err != nil {
-		return "", err
+		return err
 	}
-	return resp.Choices[0].Message.Content, nil
+	defer stream.Close()
+
+	for {
+		response, err := stream.Recv()
+		if errors.Is(err, io.EOF) {
+			return nil
+		}
+
+		if err != nil {
+			return err
+		}
+
+		_, err = io.WriteString(writer, response.Choices[0].Delta.Content)
+		if err != nil {
+			return err
+		}
+	}
 }

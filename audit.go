@@ -35,11 +35,10 @@ func newAuditCommand(opt option) *cobra.Command {
 			})
 
 			cmd.Println("Auditing...")
-			resp, err := createCompletion(cmd.Context(), opt, buf.String())
+			err = createCompletion(cmd.Context(), opt, buf.String(), cmd.OutOrStderr())
 			if err != nil {
 				return err
 			}
-			cmd.Println(resp)
 			return nil
 		},
 	}

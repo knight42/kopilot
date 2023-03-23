@@ -18,9 +18,11 @@ func main() {
 	lang := getEnvOrDefault(envKopilotLang, langEN)
 	typ := getEnvOrDefault(envKopilotType, typeChatGPT)
 	opt := option{
-		lang:  lang,
-		typ:   typ,
-		token: os.Getenv(envKopilotToken),
+		lang:       lang,
+		typ:        typ,
+		token:      os.Getenv(envKopilotToken),
+		proxy:      os.Getenv(envKopilotProxy),
+		proxyProto: os.Getenv(envKopilotProxyProto),
 	}
 	cmd := cobra.Command{
 		Use: "kopilot",

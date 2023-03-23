@@ -1,0 +1,36 @@
+apiVersion: krew.googlecontainertools.github.com/v1alpha2
+kind: Plugin
+metadata:
+  name: kopilot
+spec:
+  version: {{ .TagName }}
+  homepage: https://github.com/knight42/kopilot
+  shortDescription: Your AI Kubernetes Expert
+  description: |
+    Kopilot could help you troubleshoot the Kubernetes clusters by diagnosing unhealthy workload or nodes,
+    and audit Kubernetes resource to find the security misconfigurations.
+  platforms:
+  - selector:
+      matchLabels:
+        os: darwin
+        arch: amd64
+    {{addURIAndSha "https://github.com/knight42/kopilot/releases/download/{{ .TagName }}/kopilot_{{ .TagName }}_darwin_amd64.tar.gz" .TagName }}
+    bin: kopilot
+  - selector:
+      matchLabels:
+        os: darwin
+        arch: arm64
+    {{addURIAndSha "https://github.com/knight42/kopilot/releases/download/{{ .TagName }}/kopilot_{{ .TagName }}_darwin_arm64.tar.gz" .TagName }}
+    bin: kopilot
+  - selector:
+      matchLabels:
+        os: linux
+        arch: amd64
+    {{addURIAndSha "https://github.com/knight42/kopilot/releases/download/{{ .TagName }}/kopilot_{{ .TagName }}_linux_amd64.tar.gz" .TagName }}
+    bin: kopilot
+  - selector:
+      matchLabels:
+        os: linux
+        arch: arm64
+    {{addURIAndSha "https://github.com/knight42/kopilot/releases/download/{{ .TagName }}/kopilot_{{ .TagName }}_linux_arm64.tar.gz" .TagName }}
+    bin: kopilot

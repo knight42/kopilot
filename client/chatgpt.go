@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"io"
+	"net/http"
+	"net/url"
 
 	"github.com/sashabaranov/go-openai"
 )
@@ -13,8 +15,20 @@ type chatGPTClient struct {
 	model  string
 }
 
-func NewChatGPTClient(token string) Client {
-	c := openai.NewClient(token)
+func NewChatGPTClient(token string, proxy string, proto string) Client {
+	c := &openai.Client{}
+	if proxy != "" && proto != "" {
+		config := openai.DefaultConfig(token)
+		config.HTTPClient.Transport = &http.Transport{
+			Proxy: func(*http.Request) (*url.URL, error) {
+				return url.Parse(proto + "://" + proxy)
+			},
+		}
+		c = openai.NewClientWithConfig(config)
+	} else {
+		c = openai.NewClient(token)
+	}
+
 	return &chatGPTClient{
 		client: c,
 		model:  openai.GPT3Dot5Turbo,

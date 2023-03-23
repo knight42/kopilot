@@ -18,9 +18,11 @@ import (
 )
 
 const (
-	envKopilotToken = "KOPILOT_TOKEN"
-	envKopilotType  = "KOPILOT_TOKEN_TYPE"
-	envKopilotLang  = "KOPILOT_LANG"
+	envKopilotToken      = "KOPILOT_TOKEN"
+	envKopilotType       = "KOPILOT_TOKEN_TYPE"
+	envKopilotLang       = "KOPILOT_LANG"
+	envKopilotProxy      = "KOPILOT_PROXY"
+	envKopilotProxyProto = "KOPILOT_PROXY_PROTO"
 
 	typeChatGPT = "ChatGPT"
 	langEN      = "English"
@@ -28,9 +30,11 @@ const (
 )
 
 type option struct {
-	token string
-	lang  string
-	typ   string
+	token      string
+	lang       string
+	typ        string
+	proxy      string
+	proxyProto string
 }
 
 type templateData struct {
@@ -85,7 +89,7 @@ func createCompletion(ctx context.Context, opt option, prompt string, writer io.
 	var cli client.Client
 	switch opt.typ {
 	case typeChatGPT:
-		cli = client.NewChatGPTClient(opt.token)
+		cli = client.NewChatGPTClient(opt.token, opt.proxy, opt.proxyProto)
 	default:
 		return fmt.Errorf("invalid type %s", opt.typ)
 	}

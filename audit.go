@@ -3,7 +3,9 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"time"
 
+	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 )
@@ -34,12 +36,13 @@ func newAuditCommand(opt option) *cobra.Command {
 				Lang: opt.lang,
 			})
 
-			cmd.Println("Auditing...")
-			resp, err := createCompletion(cmd.Context(), opt, buf.String())
+			s := spinner.New(spinner.CharSets[16], 100*time.Millisecond)
+			s.Suffix = " Auditing..."
+			s.Start()
+			err = createCompletion(cmd.Context(), opt, buf.String(), cmd.OutOrStderr(), s)
 			if err != nil {
 				return err
 			}
-			cmd.Println(resp)
 			return nil
 		},
 	}

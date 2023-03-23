@@ -1,7 +1,16 @@
 package client
 
-import "context"
+import (
+	"context"
+	"io"
+)
 
 type Client interface {
-	CreateCompletion(ctx context.Context, prompt string) (string, error)
+	CreateCompletion(ctx context.Context, prompt string, writer io.Writer, spinner Spinner) error
+}
+
+type Spinner interface {
+	Start()
+	Restart()
+	Stop()
 }

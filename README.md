@@ -12,16 +12,17 @@
 
 ## Installation
 
-| Distribution                           | Command / Link                                                  |
-|----------------------------------------|-----------------------------------------------------------------|
-| Pre-built binaries for macOS, Linux    | [GitHub releases](https://github.com/knight42/kopilot/releases) |
+|         Distribution         |                         Command / Link                          |
+|:----------------------------:|:---------------------------------------------------------------:|
+|            macOS             |               `brew install knight42/tap/kopilot`               |
+| Pre-built binaries for Linux | [GitHub releases](https://github.com/knight42/kopilot/releases) |
 
 ## Usage
 
 Currently, you need to set two ENVs to run Kopilot:
 * Set `KOPILOT_TOKEN` to specify your token.
 * Set `KOPILOT_LANG` to specify the language, defaults to `English`. Valid options are `Chinese`, `French`, `Spain`, etc.
-* `KOPILOT_TOKEN_TYPE` will be available soon to let you specify AI services other than ChatGPT. Please stay tuned. 
+* `KOPILOT_TOKEN_TYPE` will be available soon to let you specify AI services other than ChatGPT. Please stay tuned.
 
 ### Diagnose
 

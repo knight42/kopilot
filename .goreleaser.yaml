@@ -1,6 +1,5 @@
 before:
   hooks:
-    # You may remove this if you don't use go modules.
     - go mod tidy
 builds:
   - env:
@@ -14,7 +13,11 @@ builds:
     gcflags:
       - all=-trimpath
 archives:
-  - format: binary
+  -
+    name_template: '{{ .ProjectName }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+    format_overrides:
+      - goos: windows
+        format: zip
 checksum:
   name_template: 'checksums.txt'
 snapshot:

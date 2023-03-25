@@ -27,7 +27,7 @@ func newAuditCommand(opt option) *cobra.Command {
 			ns, _, _ := cf.ToRawKubeConfigLoader().Namespace()
 			data, err := getResourceInYAML(cf, ns, args[0], args[1])
 			if err != nil {
-				return fmt.Errorf("marshal object: %w", err)
+				return err
 			}
 
 			var buf bytes.Buffer

@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 
 	"github.com/sashabaranov/go-openai"
@@ -45,12 +46,12 @@ func (c *chatGPTClient) CreateCompletion(ctx context.Context, prompt string, wri
 
 	for {
 		response, err := stream.Recv()
-		if errors.Is(err, io.EOF) {
-			return nil
-		}
-
 		if err != nil {
-			return err
+			if errors.Is(err, io.EOF) {
+				fmt.Fprintln(writer)
+				return nil
+			}
+			return fmt.Errorf("receive stream: %w", err)
 		}
 
 		if isFirstMsg {

@@ -62,8 +62,8 @@ func (o *Options) ToRawKubeConfigLoader() clientcmd.ClientConfig {
 	return o.kubeConfigFlags.ToRawKubeConfigLoader()
 }
 
-func (o *Options) NewChatGPTClient() client.Client {
-	return client.NewChatGPTClient(o.Token)
+func (o *Options) NewChatGPTClient(spinnerSuffix string) client.Client {
+	return client.NewChatGPTClient(o.Token, spinnerSuffix)
 }
 
 func (o *Options) NewKubeClientSet() (kubernetes.Interface, error) {

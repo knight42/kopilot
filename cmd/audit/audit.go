@@ -3,9 +3,7 @@ package audit
 import (
 	"bytes"
 	"fmt"
-	"time"
 
-	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"sigs.k8s.io/yaml"
@@ -46,10 +44,8 @@ func New(opt cmd.Options) *cobra.Command {
 				Lang: opt.Lang,
 			})
 
-			s := spinner.New(spinner.CharSets[16], 100*time.Millisecond)
-			s.Suffix = " Auditing..."
-			s.Start()
-			return opt.NewChatGPTClient().CreateCompletion(cmd.Context(), buf.String(), cmd.OutOrStdout(), s)
+			return opt.NewChatGPTClient(" Auditing...").
+				CreateCompletion(cmd.Context(), buf.String(), cmd.OutOrStdout())
 		},
 	}
 	opt.AddFlags(c.Flags())

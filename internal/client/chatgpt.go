@@ -5,24 +5,36 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"time"
 
+	"github.com/briandowns/spinner"
 	"github.com/sashabaranov/go-openai"
 )
 
 type chatGPTClient struct {
 	client *openai.Client
 	model  string
+
+	spinnerSuffix string
 }
 
-func NewChatGPTClient(token string) Client {
+func NewChatGPTClient(token, spinnerSuffix string) Client {
 	c := openai.NewClient(token)
 	return &chatGPTClient{
 		client: c,
 		model:  openai.GPT3Dot5Turbo,
+
+		spinnerSuffix: spinnerSuffix,
 	}
 }
 
-func (c *chatGPTClient) CreateCompletion(ctx context.Context, prompt string, writer io.Writer, spinner Spinner) error {
+func (c *chatGPTClient) CreateCompletion(ctx context.Context, prompt string, writer io.Writer) error {
+	s := spinner.New(spinner.CharSets[16], 100*time.Millisecond)
+	s.Suffix = c.spinnerSuffix
+	s.Start()
+	// it is okay to stop spinner twice
+	defer s.Stop()
+
 	req := openai.ChatCompletionRequest{
 		Model: c.model,
 		Messages: []openai.ChatCompletionMessage{
@@ -41,9 +53,6 @@ func (c *chatGPTClient) CreateCompletion(ctx context.Context, prompt string, wri
 
 	isFirstMsg := true
 
-	// it is okay to stop spinner twice
-	defer spinner.Stop()
-
 	for {
 		response, err := stream.Recv()
 		if err != nil {
@@ -55,7 +64,7 @@ func (c *chatGPTClient) CreateCompletion(ctx context.Context, prompt string, wri
 		}
 
 		if isFirstMsg {
-			spinner.Stop()
+			s.Stop()
 			isFirstMsg = false
 		}
 

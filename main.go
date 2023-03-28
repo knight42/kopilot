@@ -8,14 +8,11 @@ import (
 
 	"github.com/spf13/cobra"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
-)
 
-func getEnvOrDefault(key, defVal string) string {
-	if val := os.Getenv(key); val != "" {
-		return val
-	}
-	return defVal
-}
+	"github.com/knight42/kopilot/cmd"
+	"github.com/knight42/kopilot/cmd/audit"
+	"github.com/knight42/kopilot/cmd/diagnose"
+)
 
 func getCommandName() string {
 	if strings.HasPrefix(filepath.Base(os.Args[0]), "kubectl-") {
@@ -26,23 +23,22 @@ func getCommandName() string {
 }
 
 func main() {
-	lang := getEnvOrDefault(envKopilotLang, langEN)
-	typ := getEnvOrDefault(envKopilotType, typeChatGPT)
-	opt := option{
-		lang:  lang,
-		typ:   typ,
-		token: os.Getenv(envKopilotToken),
+	opt := cmd.NewOptions()
+	err := opt.Complete()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		return
 	}
-	cmd := cobra.Command{
+	rootCmd := cobra.Command{
 		Use: getCommandName(),
-		Long: fmt.Sprintf(`
-You need three ENVs to run Kopilot.
+		Long: fmt.Sprintf(`You need to set TWO ENVs to run Kopilot.
 Set %s to specify your token.
-Set %s to specify your token type, current type is: %s.
-Set %s to specify the language, current language is: %s. Valid options like Chinese, French, Spain, etc.
-`, envKopilotToken, envKopilotType, typ, envKopilotLang, lang),
+Set %s to specify the language. Valid options like Chinese, French, Spain, etc.
+`, cmd.EnvKopilotToken, cmd.EnvKopilotLang),
 	}
-	cmd.AddCommand(newDiagnoseCommand(opt))
-	cmd.AddCommand(newAuditCommand(opt))
-	_ = cmd.Execute()
+	rootCmd.AddCommand(
+		audit.New(opt),
+		diagnose.New(opt),
+	)
+	_ = rootCmd.Execute()
 }

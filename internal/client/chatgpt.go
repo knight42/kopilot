@@ -38,14 +38,10 @@ func (c *chatGPTClient) CreateCompletion(ctx context.Context, prompt string, wri
 	}
 	defer stream.Close()
 
-	isSpinnerStopped := false
 	isFirstMsg := true
 
-	defer func() {
-		if !isSpinnerStopped {
-			spinner.Stop()
-		}
-	}()
+	// it is okay to stop spinner twice
+	defer spinner.Stop()
 
 	for {
 		response, err := stream.Recv()
@@ -60,7 +56,6 @@ func (c *chatGPTClient) CreateCompletion(ctx context.Context, prompt string, wri
 		if isFirstMsg {
 			spinner.Stop()
 			isFirstMsg = false
-			isSpinnerStopped = true
 		}
 
 		_, err = io.WriteString(writer, response.Choices[0].Delta.Content)

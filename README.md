@@ -12,10 +12,11 @@
 
 ## Installation
 
-|         Distribution         |                         Command / Link                          |
-|:----------------------------:|:---------------------------------------------------------------:|
-|            macOS             |               `brew install knight42/tap/kopilot`               |
-| Pre-built binaries for Linux | [GitHub releases](https://github.com/knight42/kopilot/releases) |
+|           Distribution            |                         Command / Link                          |
+|:---------------------------------:|:---------------------------------------------------------------:|
+|               macOS               |               `brew install knight42/tap/kopilot`               |
+| [Krew](https://krew.sigs.k8s.io/) |                 `kubectl krew install kopilot`                  |
+|   Pre-built binaries for Linux    | [GitHub releases](https://github.com/knight42/kopilot/releases) |
 
 ## Usage
 
